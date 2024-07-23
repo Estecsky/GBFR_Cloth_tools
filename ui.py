@@ -1,13 +1,13 @@
 import bpy
-from .ops import add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, decimal2hex
+from .ops import add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, decimal2hex, Batch_apply
 from .ops import lst_p
 from bpy.types import Context
 # from bpy_extras.io_utils import ImportHelper
 from .xml_oi import ImportXMLFileOperator_B, ImportXMLFileOperator_A, Remove_dup, ExportXMLFileOperator, Add_custom_attr
 from .xml_oi import del_fileA_list, del_fileB_list
-from .Phy_param_ops import Change_all_dict_name
+from .Phy_param_ops import Change_all_dict_name, ALL_change_all_dict_name
 
-
+apply_bool = True
 class Convert_f(bpy.types.Panel):
     # 标签
     bl_label = '骨骼名称进制转换'  # 面板显示名称
@@ -86,6 +86,60 @@ class Import_Export_Xml(bpy.types.Panel):
         # box.prop(props, "number")
         # box.prop(props, "boolean")
 
+class Batch_modify_bone_name(bpy.types.Panel):
+    # 标签
+    bl_label = '批量修改骨骼名称（必须十进制且无前缀）'  # 面板显示名称
+    bl_idname = 'Modify_name'
+    # 面板所属区域
+    bl_space_type = "VIEW_3D"
+    # 显示面板的地方
+    bl_region_type = "UI"
+    # 显示面板的地方的归类
+    bl_category = "cloth_tools"
+    
+    def draw(self, context):
+        layout = self.layout
+        name_lst = []
+        a = bpy.context.object 
+        col = layout.column()
+        global apply_bool
+        col.label(text='选择一个骨架。')
+        if a.type == 'ARMATURE':    
+            same_num = 0
+            b = a.data.bones
+
+            for x in b:
+                name = x.name.replace('_', '')
+                name_lst.append(name)
+            first_two = name_lst[0][0:2]
+            for y in name_lst:
+                name_two = y[0:2]
+                print(name_two)
+                if first_two == name_two:
+                    same_num =same_num + 1
+            if same_num == len(name_lst):
+                box = layout.box()
+                box.label(text=f'该骨架名称有{len(name_lst)}段骨骼前两位数统一为： {first_two}')
+                apply_bool = True
+                
+                # box = layout.box()
+                # box.label(text=f'该骨架名称有{len(name_lst)}段骨骼前两位数统一为： {first_two}')
+                
+            else:
+                box = layout.box()
+                box.label(text='该骨架名称前两位数不统一。')
+                apply_bool = False
+            
+        else:
+            box = layout.box()
+            box.label(text='所选物体不是骨架。')
+        row = layout.row()
+        props = context.scene.my_properties
+        row.prop(props,'name_bones',text='将其改为')
+        row.operator(Batch_apply.bl_idname,text='应用名称更改',icon='CHECKMARK')
+            
+        
+        
 
 class Phy_parem_UI(bpy.types.Panel):
     # 标签
@@ -125,6 +179,7 @@ class Phy_parem_UI(bpy.types.Panel):
             row.prop(act_pose_bone, 'name')
             row.operator(Change_all_dict_name.bl_idname,
                          text='应用更改', icon='CHECKMARK')
+            row.operator(ALL_change_all_dict_name.bl_idname, text='应用所有更改', icon='SELECT_DIFFERENCE')
 
 
 class ExportModifiedXml(bpy.types.Panel):

@@ -1,4 +1,6 @@
+from typing import Set
 import bpy
+from bpy.types import Context
 
 
 lst_p = ['dataVersion_', 'no', 'noUp', 'noDown', 'noSide', 'noPoly', 'noFix', 'rotLimit', 'friction', 'gravityBlendRate_', 'offset',
@@ -158,4 +160,29 @@ class decimal2hex(bpy.types.Operator):
             self.report({'ERROR'}, '转换前没有添加进制前缀或为十六进制前缀')
             return {'CANCELLED'}
 
+        return {'FINISHED'}
+
+class Batch_apply(bpy.types.Operator):
+    bl_label = 'batch_apply_names'
+    bl_description = '将所有骨骼名称前两位应用更改'
+    bl_idname = 'batch_apply.ops_apply'
+
+    @classmethod
+    def poll(cls, context: Context):
+        from .ui import apply_bool
+        a = bpy.context.object
+        
+        return a.type == 'ARMATURE' and apply_bool
+    
+    def execute(self, context: Context):
+        
+        a = bpy.context.scene.my_properties
+        name_two = a.name_bones
+        b = bpy.context.object
+        bone_names = b.data.bones
+        for x in bone_names:
+            ori_name = x.name.replace('_', '')
+            new_name = '_'+ name_two + ori_name[2:]
+            x.name = new_name
+            
         return {'FINISHED'}

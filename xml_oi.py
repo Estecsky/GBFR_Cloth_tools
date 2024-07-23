@@ -31,7 +31,14 @@ class MyProperties(bpy.types.PropertyGroup):
 
         default=''
     )  # type: ignore
-
+    name_bones: StringProperty(
+        name='名称前两位',
+        subtype='FILE_NAME',
+        
+        default=''
+    )   # type: ignore
+    
+      
     def invoke(self, context, event):
         if self.filepath_b:
             if not self.filepath_b.endswith('.xml'):
