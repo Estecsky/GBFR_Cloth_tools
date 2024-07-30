@@ -186,3 +186,119 @@ class Batch_apply(bpy.types.Operator):
             x.name = new_name
             
         return {'FINISHED'}
+
+class Select_attr(bpy.types.Operator):
+    bl_label = 'selcet_attr_bones'
+    bl_description = '全选所有带物理参数骨骼'
+    bl_idname = 'selcet_attrbones.ops_bones'   
+    
+    @classmethod
+    def poll(cls, context: Context):
+        b = False
+        a = bpy.context.mode
+        if a == 'POSE' :
+            b = True
+        
+        return b
+    
+    def execute(self, context: Context):
+        armature = bpy.context.object
+        num = 0
+        bpy.ops.object.mode_set(mode='POSE')
+        if armature and armature.type == 'ARMATURE':
+            for bone in armature.pose.bones:
+                if 'no' in bone :
+                    bone.bone.select = True
+                    num = num + 1
+            self.report({'INFO'}, f'选中了{num}段骨骼')
+            num = 0
+            return {'FINISHED'}
+        
+class RemoveEmpty(bpy.types.Operator):
+    bl_idname = "panel_ops.remove_empty"
+    bl_label = 'remove_empty_vg'
+    bl_description = '移除选中模型的空顶点组'
+
+    def execute(self, context):
+        obj = bpy.context.object
+        if obj.type != "MESH":
+            self.report({'ERROR'},'所选物体不是网格')
+            return {'CANCELLED'}
+        try:
+            vertex_groups = obj.vertex_groups
+            groups = {r: None for r in range(len(vertex_groups))}
+
+            for vert in obj.data.vertices:
+                for vg in vert.groups:
+                    i = vg.group
+                    if i in groups:
+                        del groups[i]
+
+            lis = [k for k in groups]
+            lis.sort(reverse=True)
+            for i in lis:
+                print(f"{vertex_groups[i].name} removed")
+                vertex_groups.remove(vertex_groups[i])
+        except Exception as e:
+            print(e)
+        return {"FINISHED"}
+    
+class RemoveUnusedBones(bpy.types.Operator):
+    bl_label = 'remove_unused_bones'
+    bl_description = '根据模型的骨架修改器移除骨架中没有对应顶点组的骨骼'
+    bl_idname = 'misremove_unused.ops_bones'
+    
+    def execute(self, context: Context):
+        obj = bpy.context.object
+        vertex_groups = obj.vertex_groups
+        skeleton = obj.find_armature()
+        if obj.type != "MESH":
+            self.report({'ERROR'},'所选物体不是网格,需要选择一个网格')
+            return {"FINISHED"}
+        if skeleton is None:
+            self.report({'ERROR'},'选中物体未找到正确的骨架修改器')
+            return {"FINISHED"}
+        if obj.type == "MESH" and len(obj.vertex_groups) > 0:
+            bones_to_remove = []
+            bones = skeleton.data.bones
+            skeleton_data  = skeleton.data
+            vg_lst = []
+            for vg in vertex_groups:
+                vg_lst.append(vg.name)
+            for bone in bones:
+                bone_name = bone.name
+                exists_in_vg = False
+                
+                if bone_name in vg_lst:
+                    exists_in_vg = True
+                
+                if not exists_in_vg:
+                    bones_to_remove.append(bone_name)
+                    
+            # 删除不存在对应顶点组的骨骼
+            bpy.ops.object.mode_set(mode='OBJECT')  # 确保在对象模式下
+            bpy.ops.object.select_all(action='DESELECT')
+            skeleton.select_set(True)
+            bpy.context.view_layer.objects.active = skeleton
+            bpy.ops.object.mode_set(mode='EDIT')  # 进入编辑模式以删除骨骼
+            # print(bones_to_remove)
+            if bones_to_remove:
+                
+            
+                for bone_name in bones_to_remove:
+                    
+                    edit_bone = skeleton_data.edit_bones.get(bone_name)
+
+                    skeleton_data.edit_bones.remove(edit_bone)
+                    self.report({'INFO'},f"骨骼 '{bone_name}' 已移除.")
+            
+            else:
+                self.report({'WARNING'},"没有找到任何未使用骨骼，请先移除空顶点组")
+
+            # 更新物体的所有顶点组
+            # obj.vertex_groups.clear()
+            # for vg in vertex_groups:
+            #     obj.vertex_groups.new(name=vg.name)
+
+
+            return {"FINISHED"}

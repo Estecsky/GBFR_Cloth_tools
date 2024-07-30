@@ -1,5 +1,6 @@
 import bpy
-from .ops import add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, decimal2hex, Batch_apply
+from .ops import add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, decimal2hex, Batch_apply, Select_attr
+from .ops import RemoveEmpty, RemoveUnusedBones
 from .ops import lst_p
 from bpy.types import Context
 # from bpy_extras.io_utils import ImportHelper
@@ -83,6 +84,7 @@ class Import_Export_Xml(bpy.types.Panel):
         box.label(text='4.为骨骼添加自定义物理属性（注意必须为十进制名称）')
         box.operator(Add_custom_attr.bl_idname,
                      text='添加物理属性', icon='SEQ_CHROMA_SCOPE')
+
         # box.prop(props, "number")
         # box.prop(props, "boolean")
 
@@ -114,7 +116,7 @@ class Batch_modify_bone_name(bpy.types.Panel):
             first_two = name_lst[0][0:2]
             for y in name_lst:
                 name_two = y[0:2]
-                print(name_two)
+                # print(name_two)
                 if first_two == name_two:
                     same_num =same_num + 1
             if same_num == len(name_lst):
@@ -198,3 +200,25 @@ class ExportModifiedXml(bpy.types.Panel):
         col = layout.column()
         col.operator(ExportXMLFileOperator.bl_idname,
                      text='导出修改后的clp文件', icon='EXPORT')
+        
+class Miscellaneous(bpy.types.Panel):
+    # 标签
+    bl_label = '杂项'  # 面板显示名称
+    bl_idname = 'Miscellaneous_UI'
+    # 面板所属区域
+    bl_space_type = "VIEW_3D"
+    # 显示面板的地方
+    bl_region_type = "UI"
+    # 显示面板的地方的归类
+    bl_category = "cloth_tools"
+    
+    def draw(self, context: Context):
+        layout = self.layout
+        col = layout.column()
+        
+        col.operator(Select_attr.bl_idname,
+                     text='全选所有物理骨骼')
+        col.operator(RemoveEmpty.bl_idname,
+                     text='移除空顶点组')
+        col.operator(RemoveUnusedBones.bl_idname,
+                     text='移除未使用骨骼')

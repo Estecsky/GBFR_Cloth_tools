@@ -3,8 +3,8 @@
 # sys.path.append(path)
 
 
-from .ops import add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, decimal2hex, Batch_apply
-from .ui import Convert_f, Prefix_Panel, Import_Export_Xml, Phy_parem_UI, ExportModifiedXml, Batch_modify_bone_name
+from .ops import add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, decimal2hex, Batch_apply, Select_attr, RemoveEmpty, RemoveUnusedBones
+from .ui import Convert_f, Prefix_Panel, Import_Export_Xml, Phy_parem_UI, ExportModifiedXml, Batch_modify_bone_name, Miscellaneous
 from .Phy_param_ops import Change_all_dict_name, ALL_change_all_dict_name
 from .xml_oi import MyProperties, ImportXMLFileOperator_B, ImportXMLFileOperator_A, Remove_dup, ExportXMLFileOperator, Add_custom_attr
 from .xml_oi import del_fileA_list, del_fileB_list
@@ -20,14 +20,14 @@ bl_info = {
     "location": "3D视图 > 侧边栏",  # 插件显示的位置
     "warning": "插件处于测试阶段",    # 警告信息
     "category": "3D View",  # 归类信息 搜索插件的时候显示的分类
-    "version": (0, 4, 0)
+    "version": (0, 5, 0)
 }
 
 
 lst = [add_prefix_hex, add_prefix_dec, cancel_prefix, hex2decimal, Change_all_dict_name, MyProperties, del_fileA_list,
        ImportXMLFileOperator_B, ImportXMLFileOperator_A, Remove_dup, ExportXMLFileOperator, Add_custom_attr, del_fileB_list, ALL_change_all_dict_name,
-       Batch_apply,
-       decimal2hex, Import_Export_Xml, Prefix_Panel, Convert_f, Batch_modify_bone_name, Phy_parem_UI, ExportModifiedXml]
+       Batch_apply, Select_attr, RemoveEmpty, RemoveUnusedBones,
+       decimal2hex, Import_Export_Xml, Miscellaneous, Prefix_Panel, Convert_f, Batch_modify_bone_name, Phy_parem_UI, ExportModifiedXml]
 
 
 # def reset_filepath_properties(scene):
